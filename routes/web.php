@@ -29,5 +29,5 @@ Route::middleware([
 ])->group(function () {
     Route::get('/dashboard', PageDashboardController::class)->name('pages.dashboard');
     Route::get('videos/{course:slug}', PageVideosController::class)
-        ->name('page.course-videos');
+        ->name('pages.course-videos');
 });
