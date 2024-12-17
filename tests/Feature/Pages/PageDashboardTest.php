@@ -3,14 +3,13 @@
 use App\Models\Course;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Sequence;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Carbon;
 use function Pest\Laravel\get;
 
-uses(RefreshDatabase::class);
 
 it('cannot be accessed by guest', function () {
     // Act & Assert
-    get(route('dashboard'))
+    get(route('pages.dashboard'))
         ->assertRedirect(route('login'));
 });
 
@@ -25,8 +24,8 @@ it('lists purchased courses', function () {
                 ->create();
 
     // Act & Assert
-    $this->actingAs($user);
-    get(route('dashboard'))
+    loginAsUser($user);
+    get(route('pages.dashboard'))
         ->assertOk()
         ->assertSeeText([
             'Course A',
@@ -36,24 +35,45 @@ it('lists purchased courses', function () {
 
 it('does not list other courses', function () {
     // Arrange
+    $course = Course::factory()->create();
 
-    // Act
+    // Act & Assert
+    loginAsUser();
+    get(route('pages.dashboard'))
+        ->assertOk()
+        ->assertSeeText($course->title);
 
-    // Assert
 });
 
 it('shows latest purchased course first', function () {
     // Arrange
+    $user = loginAsUser();
+    $firstPurchasedCourse = Course::factory()->create();
+    $secondPurchasedCourse = Course::factory()->create();
 
-    // Act
+    $user->courses()->attach($firstPurchasedCourse, ['created_at' => Carbon::yesterday()]);
+    $user->courses()->attach($secondPurchasedCourse, ['created_at' => Carbon::now()]);
 
-    // Assert
+    // Act & Assert
+    get(route('pages.dashboard'))
+        ->assertOk()
+        ->assertSeeInOrder([
+            $secondPurchasedCourse->title,
+            $firstPurchasedCourse->title
+        ]);
 });
 
 it('includes link to product videos', function () {
     // Arrange
+    $user = User::factory()
+        ->has(Course::factory())
+        ->create();
 
-    // Act
+    // Act & Assert
+    loginAsUser($user);
+    get(route('pages.dashboard'))
+        ->assertOk()
+        ->assertSeeText('Watch Videos')
+        ->assertSee(route('pages.course-videos', Course::first()));
 
-    // Assert
 });
