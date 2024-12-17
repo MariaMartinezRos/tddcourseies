@@ -4,6 +4,7 @@ use App\Models\Course;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Support\Carbon;
+
 use function Pest\Laravel\get;
 
 
@@ -41,9 +42,10 @@ it('does not list other courses', function () {
     loginAsUser();
     get(route('pages.dashboard'))
         ->assertOk()
-        ->assertSeeText($course->title);
+        ->assertDontSeeText($course->title);
 
 });
+
 
 it('shows latest purchased course first', function () {
     // Arrange
@@ -73,7 +75,6 @@ it('includes link to product videos', function () {
     loginAsUser($user);
     get(route('pages.dashboard'))
         ->assertOk()
-        ->assertSeeText('Watch Videos')
-        ->assertSee(route('pages.course-videos', Course::first()));
-
+        ->assertSeeText('Watch videos')
+        ->assertSee(route('page.course-videos', Course::first()));
 });
