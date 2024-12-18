@@ -64,6 +64,6 @@ it('includes logout if logged in', function () {
     // Act
     get(route('pages.home'))
         ->assertOk()
-        ->assertSee('Logout')
+        ->assertSee('Log Out')
         ->assertSee(route('logout'));
 });
